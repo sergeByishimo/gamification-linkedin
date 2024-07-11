@@ -47,8 +47,8 @@
     <tag>HEAD</tag>
   </scm>
   <properties>
-    <org.meeds.social.version>7.0.x-SNAPSHOT</org.meeds.social.version>
-    <org.meeds.platform-ui.version>7.0.x-SNAPSHOT</org.meeds.platform-ui.version>
+    <io.meeds.social.version>7.0.x-SNAPSHOT</io.meeds.social.version>
+    <io.meeds.platform-ui.version>7.0.x-SNAPSHOT</io.meeds.platform-ui.version>
     <addon.meeds.gamification.version>7.0.x-SNAPSHOT</addon.meeds.gamification.version>
 
     <!-- Sonar properties -->
@@ -60,14 +60,14 @@
       <dependency>
         <groupId>io.meeds.social</groupId>
         <artifactId>social-component-core</artifactId>
-        <version>${org.meeds.social.version}</version>
+        <version>${io.meeds.social.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>io.meeds.platform-ui</groupId>
         <artifactId>platform-ui</artifactId>
-        <version>${org.meeds.platform-ui.version}</version>
+        <version>${io.meeds.platform-ui.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
