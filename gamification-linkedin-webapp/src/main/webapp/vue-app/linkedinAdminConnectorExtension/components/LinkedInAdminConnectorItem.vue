@@ -122,7 +122,12 @@
       v-else
       :hook="selectedHook"
       @close="displayHookDetail = false" />
-    <linkedin-admin-hook-form-drawer @hooksUpdated="refreshHooks" />
+    <linkedin-admin-hook-form-drawer
+        :api-key="apiKey"
+        :secrey-key="secretKey"
+        :redirect-url="redirectUrl"
+        :enabled="enabled"
+        @hooksUpdated="refreshHooks" />
     <linkedin-admin-connection-setting-drawer ref="connectionSettingDrawer" />
     <exo-confirm-dialog
       ref="deleteConfirmDialog"

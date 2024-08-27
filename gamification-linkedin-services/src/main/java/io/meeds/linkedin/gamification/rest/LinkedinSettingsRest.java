@@ -1,5 +1,6 @@
 package io.meeds.linkedin.gamification.rest;
 
+import io.meeds.gamification.model.RemoteConnectorSettings;
 import io.meeds.linkedin.gamification.services.LinkedinService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @RestController
 @RequestMapping("settings")
@@ -28,6 +30,29 @@ public class LinkedinSettingsRest {
 
     @Autowired
     private LinkedinService linkedinService;
+
+
+    @GetMapping("check-secret")
+    @Secured("rewarding")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get LinkedIn connector settings", method = "GET")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+            @ApiResponse(responseCode = "400", description = "Invalid query input"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getSettings() throws IllegalAccessException {
+
+        LOG.debug("LinkedinSettingsRest.getSettings: started");
+
+        org.exoplatform.services.security.Identity identity = ConversationState.getCurrent().getIdentity();
+        RemoteConnectorSettings remoteConnectorSettings = linkedinService.getConnectorSettings(identity);
+
+        boolean hasSecret = remoteConnectorSettings.getSecretKey() != null;
+
+        return Response.ok().entity("{\"hasSecret\": " + hasSecret + "}").build();
+    }
 
     @GetMapping("oauthCallback")
     @Secured("rewarding")

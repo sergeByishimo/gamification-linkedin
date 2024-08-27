@@ -29,7 +29,7 @@ public class LinkedInConnectorPlugin extends ConnectorPlugin {
 
     private static final Log LOG                = ExoLogger.getLogger(LinkedInConnectorPlugin.class);
 
-    private static final String     CONNECTOR_NAME     = "linkedin";
+    public static final String     CONNECTOR_NAME     = "linkedin";
 
     private static final String     NAME               = "linkedin";
 

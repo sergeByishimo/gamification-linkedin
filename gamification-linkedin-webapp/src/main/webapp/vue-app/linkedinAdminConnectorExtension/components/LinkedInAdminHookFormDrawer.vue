@@ -27,7 +27,13 @@
       {{ drawerTitle }}
     </template>
     <template v-if="drawer" #content>
+
+      <v-card-text v-if="!ready" class="text-color">
+        {{ $t('linkedinConnector.admin.message.keys.missing') }}
+      </v-card-text>
+
       <v-form
+        v-if="ready"
         ref="ProjectForm"
         v-model="isValidForm"
         class="form-horizontal pt-0 pb-4"
@@ -51,7 +57,7 @@
                   <v-btn
                       class="btn btn-primary ma-auto"
                       small
-                      @click="createAccessToken">
+                      @click="openOAuthPopUp">
                       <span class="ms-2 subtitle-2 font-weight-bold">
                         {{ $t('linkedinConnector.admin.label.create.access.token') }}
                       </span>
@@ -115,29 +121,85 @@
               :complete="stepper > 2"
               step="2"
               class="ma-0">
-              <span class="font-weight-bold text-color text-subtitle-1">{{ $t('linkedinConnector.admin.label.identifyProject') }}</span>
+              <span class="font-weight-bold text-color text-subtitle-1">{{ $t('linkedinConnector.admin.label.search.company') }}</span>
             </v-stepper-step>
             <v-slide-y-transition>
-              <div v-show="stepper > 1" class="px-6">
+              <div v-show="stepper === 2" class="px-6">
                 <v-card-text class="d-flex py-0 ps-0">
-                  <v-select
-                    v-model="projectId"
-                    :items="companies"
-                    item-text="name"
-                    item-value="id"
-                    :placeholder="$t('linkedinConnector.admin.label.company.placeholder')"
-                    class="ignore-vuetify-classes flex-grow-1"
-                    required
-                    @change="hookEdited = true">
-                    <template v-if="data" #selection="data">
-                      <!-- HTML that describe how select should render selected items -->
-                      {{ data.item.name }} / {{ data.item.identifier }}
-                    </template>
-                    <template v-if="data" #item="data">
-                      <!-- HTML that describe how select should render items when the select is open -->
-                      {{ data.item.name }} / {{ data.item.identifier }}
-                    </template>
-                  </v-select>
+
+                  <input
+                      ref="connectorApiKey"
+                      v-model="keyword"
+                      :placeholder="$t('linkedinConnector.admin.search.org.placeholder')"
+                      type="text"
+                      class="ignore-vuetify-classes full-width"
+                      required
+                      @input="disabled = false"
+                      @change="disabled = false">
+
+<!--                  <v-select-->
+<!--                    v-model="projectId"-->
+<!--                    :items="companies"-->
+<!--                    item-text="name"-->
+<!--                    item-value="id"-->
+<!--                    :placeholder="$t('linkedinConnector.admin.label.company.placeholder')"-->
+<!--                    class="ignore-vuetify-classes flex-grow-1"-->
+<!--                    required-->
+<!--                    @change="hookEdited = true">-->
+<!--                    <template v-if="data" #selection="data">-->
+<!--                      &lt;!&ndash; HTML that describe how select should render selected items &ndash;&gt;-->
+<!--                      {{ data.item.name }} / {{ data.item.identifier }}-->
+<!--                    </template>-->
+<!--                    <template v-if="data" #item="data">-->
+<!--                      &lt;!&ndash; HTML that describe how select should render items when the select is open &ndash;&gt;-->
+<!--                      {{ data.item.name }} / {{ data.item.identifier }}-->
+<!--                    </template>-->
+<!--                  </v-select>-->
+
+                </v-card-text>
+              </div>
+            </v-slide-y-transition>
+          </div>
+          <div class="flex-grow-1 flex-shrink-0">
+            <v-stepper-step
+                :complete="stepper > 3"
+                step="3"
+                class="ma-0">
+              <span class="font-weight-bold text-color text-subtitle-1">{{ $t('linkedinConnector.admin.label.choose.company') }}</span>
+            </v-stepper-step>
+            <v-slide-y-transition>
+              <div v-show="stepper > 2" class="px-6">
+                <v-card-text class="d-flex py-0 ps-0">
+
+<!--                  <input-->
+<!--                      ref="connectorApiKey"-->
+<!--                      v-model="keyword"-->
+<!--                      :placeholder="$t('linkedinConnector.admin.search.org.placeholder')"-->
+<!--                      type="text"-->
+<!--                      class="ignore-vuetify-classes full-width"-->
+<!--                      required-->
+<!--                      @input="disabled = false"-->
+<!--                      @change="disabled = false">-->
+
+                                    <v-select
+                                      v-model="projectId"
+                                      :items="companies"
+                                      item-text="name"
+                                      item-value="id"
+                                      :placeholder="$t('linkedinConnector.admin.label.company.placeholder')"
+                                      class="ignore-vuetify-classes flex-grow-1"
+                                      required
+                                      @change="hookEdited = true">
+                                      <template v-if="data" #selection="data">
+                                        <!-- HTML that describe how select should render selected items -->
+                                        {{ data.item.name }} / {{ data.item.identifier }}
+                                      </template>
+                                      <template v-if="data" #item="data">
+                                        <!-- HTML that describe how select should render items when the select is open -->
+                                        {{ data.item.name }} / {{ data.item.identifier }}
+                                      </template>
+                                    </v-select>
+
                 </v-card-text>
               </div>
             </v-slide-y-transition>
@@ -175,7 +237,15 @@
           <i class="fas fa-spinner fa-spin"></i>
         </v-btn>
         <v-btn
-          v-if="stepper === 2"
+            v-if="stepper === 2"
+            :disabled="disabledSearch"
+            :loading="loading"
+            class="btn btn-primary"
+            @click="searchOrganizations">
+          {{ $t('linkedinConnector.webhook.form.label.button.search') }}
+        </v-btn>
+        <v-btn
+          v-if="stepper === 3"
           :disabled="disabledSave"
           :loading="loading"
           class="btn btn-primary"
@@ -189,8 +259,27 @@
 
 <script>
 export default {
+  props: {
+    apiKey: {
+      type: String,
+      default: ''
+    },
+    secretKey: {
+      type: String,
+      default: ''
+    },
+    redirectUrl: {
+      type: String,
+      default: ''
+    },
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+  },
   data: () => ({
     hook: {},
+    ready: false,
     stepper: 0,
     isValidForm: false,
     drawer: false,
@@ -203,9 +292,13 @@ export default {
     hookEdited: false,
     loading: false,
     companies: null,
+    keyword: null
   }),
   created() {
     this.$root.$on('linkedin-hook-form-drawer', this.open);
+
+
+
   },
   computed: {
     hookId() {
@@ -213,6 +306,9 @@ export default {
     },
     disabledSave() {
       return !this.hookEdited || !this.projectId;
+    },
+    disabledSearch() {
+      return this.keyword == null;
     },
     disableNextStepButton() {
       return (this.hookId && !this.accessTokenStored) || (this.hookId && !this.accessToken && this.isTokenEditing) || this.isTokenEditing || this.isFetchingProjects;
@@ -223,6 +319,13 @@ export default {
   },
   methods: {
     open(hook) {
+
+      if (this.apiKey != null && this.redirectUrl != null && this.enabled === true) {
+        this.ready = true;
+      } else {
+        this.ready = false;
+      }
+
       if (hook) {
         this.hook = hook;
         this.projectId = hook?.projectId || null;
@@ -330,16 +433,28 @@ export default {
         this.getProjects();
       }
     },
-    createAccessToken() {
+    openOAuthPopUp() {
       console.log('createAccessToken: started');
       const width = 500;
       const height = 600;
       const left = window.innerWidth / 2 - width / 2;
       const top = window.innerHeight / 2 - height / 2;
-      const apiKey = '78qi1ofo06h5gc';
-      const redirectUrl = 'https://mymeeds.serveo.net/gamification-linkedin/rest/settings/oauthCallback';
-      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${apiKey}&redirect_uri=${redirectUrl}&response_type=code&scope=r_organization_followers,r_organization_social`;
-      return window.open(authUrl, 'LinkedIn OAuth', `width=${width}, height=${height}, left=${left}, top=${top}`);
+      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${this.apiKey}&redirect_uri=${this.redirectUrl}&response_type=code&scope=r_organization_followers,r_organization_social`;
+      const oauthPopup = window.open(authUrl, 'LinkedIn OAuth', `width=${width}, height=${height}, left=${left}, top=${top}`);
+      const pollTimer = window.setInterval(() =>  {
+        if (oauthPopup.closed !== false) { // !== is required for compatibility with Opera
+          window.clearInterval(pollTimer);
+          this.stepper = 2;
+        }
+      }, 200);
+
+    },
+    searchOrganizations() {
+      console.log('searchOrgs: started');
+
+      // perform search
+
+      this.stepper = 3;
     }
   }
 };
