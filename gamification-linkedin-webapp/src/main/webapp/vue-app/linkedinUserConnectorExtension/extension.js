@@ -15,20 +15,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import linkedinConnector from './js/linkedinConnector';
+
 export function init() {
-  extensionRegistry.registerExtension('engagementCenterConnectors', 'connector-extensions', {
-    id: 'linkedin',
-    name: 'linkedin',
-    icon: 'fab fa-linkedin',
-    iconColorClass: 'light-blue--text text--darken-4',
-    title: 'LinkedIn',
-    description: 'gamification.admin.linkedIn.label.description',
-    rank: 50,
-    comingSoon: false,
-    init: () => {
-      const lang = window.eXo?.env?.portal?.language || 'en';
-      const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.portlet.LinkedInWebHookManagement-${lang}.json`;
-      return exoi18n.loadLanguageAsync(lang, url);
-    }
-  });
+  extensionRegistry.registerExtension('gamification', 'connectors', linkedinConnector);
 }

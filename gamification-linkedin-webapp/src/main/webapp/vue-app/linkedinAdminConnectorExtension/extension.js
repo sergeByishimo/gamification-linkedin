@@ -15,20 +15,13 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import './initComponents';
+import './services.js';
+
 export function init() {
-  extensionRegistry.registerExtension('engagementCenterConnectors', 'connector-extensions', {
-    id: 'linkedin',
+  extensionRegistry.registerComponent('gamification-admin-connector', 'admin-connector-item', {
+    id: 'linkedinSetting',
     name: 'linkedin',
-    icon: 'fab fa-linkedin',
-    iconColorClass: 'light-blue--text text--darken-4',
-    title: 'LinkedIn',
-    description: 'gamification.admin.linkedIn.label.description',
-    rank: 50,
-    comingSoon: false,
-    init: () => {
-      const lang = window.eXo?.env?.portal?.language || 'en';
-      const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.portlet.LinkedInWebHookManagement-${lang}.json`;
-      return exoi18n.loadLanguageAsync(lang, url);
-    }
+    vueComponent: Vue.options.components['linkedin-admin-connector-item'],
   });
 }

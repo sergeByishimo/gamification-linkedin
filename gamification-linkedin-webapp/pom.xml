@@ -84,11 +84,15 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <packagingExcludes>**/*.less,**/*.vue,css/lib/*,vue-app/**,js/mock/**/*,**-dev.*</packagingExcludes>
-<!--          <outputDirectory>/Users/serge/Downloads/meeds-community-7.0.x-meed-SNAPSHOT/webapps</outputDirectory>-->
+          <outputDirectory>/Users/serge/Downloads/meeds-community-7.0.x-meed-SNAPSHOT/webapps</outputDirectory>
         </configuration>
       </plugin>
     </plugins>

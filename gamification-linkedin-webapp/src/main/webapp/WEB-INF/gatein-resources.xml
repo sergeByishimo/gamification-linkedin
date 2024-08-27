@@ -65,6 +65,51 @@
             <module>extensionRegistry</module>
         </depends>
     </module>
-
+    
+    <module>
+        <name>gamificationAdminConnectorsExtensionsLinkedIn</name>
+        <load-group>gamification-admin-connectors</load-group>
+        <script>
+            <path>/js/linkedinAdminConnectorExtension.bundle.js</path>
+        </script>
+        <depends>
+            <module>vue</module>
+        </depends>
+        <depends>
+            <module>vuetify</module>
+        </depends>
+        <depends>
+            <module>eXoVueI18n</module>
+        </depends>
+        <depends>
+            <module>extensionRegistry</module>
+        </depends>
+        <depends>
+            <module>commonVueComponents</module>
+        </depends>
+    </module>
+    
+    <module>
+        <name>gamificationUserConnectorsExtensionsLinkedIn</name>
+        <load-group>gamification-user-connectors</load-group>
+        <script>
+            <path>/js/linkedinUserConnectorExtension.bundle.js</path>
+        </script>
+        <depends>
+            <module>vue</module>
+        </depends>
+        <depends>
+            <module>vuetify</module>
+        </depends>
+        <depends>
+            <module>eXoVueI18n</module>
+        </depends>
+        <depends>
+            <module>extensionRegistry</module>
+        </depends>
+        <depends>
+            <module>commonVueComponents</module>
+        </depends>
+    </module>
 </gatein-resources>
 
