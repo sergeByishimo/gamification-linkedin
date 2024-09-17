@@ -15,6 +15,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+export function searchOrganizations(keyword) {
+  return fetch(`/gamification-linkedin/rest/remote/organization/lookup/?keyword=${keyword || ''}`  , {
+    method: 'GET',
+    credentials: 'include',
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else if (resp.status === 404 || resp.status === 401) {
+      return resp.json().then((data) => {
+        throw new Error(data.message);
+      });
+    } else {
+      throw new Error('Error when getting linkedin companies');
+    }
+  });
+}
+
 export function getProjects(accessToken, hookId) {
   return fetch(`/gamification-linkedin/rest/linkedin/hooks/companies?accessToken=${accessToken || ''}&hookId=${hookId || ''}`  , {
     method: 'GET',

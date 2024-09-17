@@ -453,6 +453,15 @@ export default {
       console.log('searchOrgs: started');
 
       // perform search
+      return this.$linkedinConnectorService.searchOrganizations(this.keyword)
+        .then(companies => {
+          this.companies = companies;
+        })
+        .catch(error => {
+          this.displayNotificationAlert(error.message, 'error');
+          this.editAccessToken();
+        })
+        .finally(() => this.isFetchingProjects = false);
 
       this.stepper = 3;
     }

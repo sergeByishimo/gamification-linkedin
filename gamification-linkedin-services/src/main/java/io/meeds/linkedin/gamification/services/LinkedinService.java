@@ -4,15 +4,18 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import io.meeds.gamification.model.RemoteConnectorSettings;
 import io.meeds.gamification.service.ConnectorSettingService;
 import io.meeds.gamification.utils.Utils;
-import io.meeds.gamification.websocket.entity.ConnectorIdentifierModification;
+import io.meeds.linkedin.gamification.model.RemoteOrganization;
 import io.meeds.linkedin.gamification.plugin.LinkedInConnectorPlugin;
 import io.meeds.linkedin.gamification.storage.LinkedinAccountStorage;
+import io.meeds.linkedin.gamification.storage.LinkedinConsumerStorage;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.Identity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class LinkedinService {
@@ -31,21 +34,23 @@ public class LinkedinService {
     private LinkedInConnectorPlugin linkedInConnectorPlugin;
     @Autowired
     private ListenerService listenerService;
+    @Autowired
+    private LinkedinConsumerStorage linkedinConsumerStorage;
 
-    public RemoteConnectorSettings getConnectorSettings(Identity identity) throws IllegalAccessException {
-        if (!Utils.isRewardingManager(identity.getUserId())) {
-            throw new IllegalAccessException("The user is not authorized to get LinkedIn connector settings");
-        }
-
-        LOG.debug("LinkedinService.getConnectorSettings: started");
-
-        return connectorSettingService.getConnectorSettings(
-                LinkedInConnectorPlugin.CONNECTOR_NAME);
-    }
+//    public RemoteConnectorSettings getConnectorSettings(Identity identity) throws IllegalAccessException {
+//        if (!Utils.isRewardingManager(identity.getUserId())) {
+//            throw new IllegalAccessException("The user is not authorized to get LinkedIn connector settings");
+//        }
+//
+//        LOG.debug("LinkedinService.getConnectorSettings: started");
+//
+//        return connectorSettingService.getConnectorSettings(
+//                LinkedInConnectorPlugin.CONNECTOR_NAME);
+//    }
 
     public void validateOathCode(Identity identity, String code) throws IllegalAccessException {
         if (!Utils.isRewardingManager(identity.getUserId())) {
-            throw new IllegalAccessException("The user is not authorized to save or update LinkedIn Bearer Token");
+            throw new IllegalAccessException("The user is not authorized to validate LinkedIn Bearer Token");
         }
 
         LOG.debug("SettingsService.validateOathCode: started");
@@ -62,20 +67,17 @@ public class LinkedinService {
         LOG.debug("SettingsService.validateOathCode: getExpiresIn: " + oAuth2AccessToken.getExpiresIn());
 
         linkedinAccountStorage.saveLinkedinBearerToken(oAuth2AccessToken.getAccessToken());
-
-        try {
-            listenerService.broadcast(TOKEN_CREATED_EVENT_NAME,
-                    new ConnectorIdentifierModification("connectorIdentifierUpdated",
-                            connectorName,
-                            username,
-                            connectorUserId),
-                    username);
-        } catch (Exception e) {
-            LOG.warn("Error while broadcasting operation '{}' for connector {}", "connectorIdentifierUpdated", connectorName, e);
-        }
     }
 
+    public String getLinkedinBearerToken() {
+        return linkedinAccountStorage.getLinkedinBearerToken();
+    }
 
+    public List<RemoteOrganization> searchOrganizationsByName(String keyword, Identity identity) throws IllegalAccessException {
+        if (!Utils.isRewardingManager(identity.getUserId())) {
+            throw new IllegalAccessException("The user is not authorized to search organizations by name");
+        }
 
-
+        return linkedinConsumerStorage.findOrganizationsByVanityName(this.getLinkedinBearerToken(), keyword);
+    }
 }
