@@ -53,8 +53,6 @@ public class LinkedInWebhookController {
   public ResponseEntity<Object> linkedInEvent(
           @Parameter(required = true) @RequestParam("senderId") String senderId,
           @Parameter(required = true) @RequestParam("receiverId") String receiverId,
-          @Parameter(required = false) @RequestParam("objectId") String objectId,
-          @Parameter(required = false) @RequestParam("objectType") String objectType,
           @Parameter(required = true) @RequestParam("ruleTitle") String ruleTitle
           ) {
     try {
@@ -66,8 +64,8 @@ public class LinkedInWebhookController {
         Map<String, String> gam = new HashMap<>();
         gam.put("senderId", senderId);
         gam.put("receiverId", receiverId);
-        gam.put("objectId", objectId);
-        gam.put("objectType", objectType);
+        gam.put("objectId", "");
+        gam.put("objectType", "");
 //        gam.put("eventDetails", eventDetails);
 
         gam.put("ruleTitle", ruleTitle);
